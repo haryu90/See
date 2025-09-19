@@ -73,8 +73,16 @@ class Review(commands.Cog):
 
         await interaction.followup.send(embed=embed)
 
+# 기존 코드 위에 추가
+
+@bot.event
+async def setup_hook():
+    await setup(bot)
+
 async def setup(bot):
     await bot.add_cog(Review(bot))
+
+
 
 @bot.event
 async def on_ready():
