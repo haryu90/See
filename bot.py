@@ -82,9 +82,10 @@ async def on_ready():
         print(f"❌ 슬래시 명령어 동기화 실패: {e}")
 
 # 봇 실행
+TOKEN = os.getenv("Token_")
+
 def main():
-    token_ = "Token_"
-    bot.run(token_)
+    bot.run(TOKEN)
 
 if __name__ == "__main__":
     main()
