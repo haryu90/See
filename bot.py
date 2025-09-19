@@ -83,7 +83,7 @@ async def on_ready():
 
 # 봇 실행
 def main():
-    bot.run(token_)
+    bot.run(Token_)
 
 if __name__ == "__main__":
     main()
