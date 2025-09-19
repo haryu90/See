@@ -31,8 +31,9 @@ DATA_FILE = "data.json"
 
 data = {
     "total_reviews": 0,
-    "user_review_counts": {},
-    "maker_review_counts": {}
+    "user_review_counts": {},     # {user_id: count}
+    "maker_review_counts": {},    # {maker_id: count}
+    "reviews": {}                 # {"userID:makerID": "후기내용"}
 }
 
 def load_data():
@@ -55,34 +56,66 @@ class Review(commands.Cog):
         user = interaction.user
         user_id = str(user.id)
         maker_id = str(maker.id)
+        key = f"{user_id}:{maker_id}"
 
+        # 후기 중복 체크 - 덮어쓰기 방지, 기존 후기 삭제 후 새로 추가
+        if key in data["reviews"]:
+            await interaction.response.send_message(f"❗ 이미 {maker.mention}님께 작성한 후기가 있습니다. 삭제 후 다시 작성해주세요.", ephemeral=True)
+            return
+
+        # 후기 저장
+        data["reviews"][key] = content
         data["total_reviews"] += 1
         data["user_review_counts"][user_id] = data["user_review_counts"].get(user_id, 0) + 1
         data["maker_review_counts"][maker_id] = data["maker_review_counts"].get(maker_id, 0) + 1
 
         save_data()
 
+        # 후기 메시지
         await interaction.response.send_message(
             f"{user.mention} 님의 {maker.mention} 후기: {content}"
         )
 
+        # 통계 임베드 (footer에 한 줄로)
         embed = discord.Embed(color=discord.Color.dark_gray())
-        embed.add_field(name=" 전체 후기 수", value=str(data["total_reviews"]), inline=True)
-        embed.add_field(name=f"{user.name}님의 작성 수", value=str(data["user_review_counts"][user_id]), inline=True)
-        embed.add_field(name=f"{maker.name}님이 받은 수", value=str(data["maker_review_counts"][maker_id]), inline=True)
-
+        footer_text = f"전체 후기 수: {data['total_reviews']} | {user.name} 작성 수: {data['user_review_counts'][user_id]} | {maker.name} 받은 수: {data['maker_review_counts'][maker_id]}"
+        embed.set_footer(text=footer_text)
         await interaction.followup.send(embed=embed)
 
-# 기존 코드 위에 추가
+    @app_commands.command(name="후기삭제", description="작성한 후기를 삭제합니다. /후기삭제 @제작자")
+    @app_commands.describe(maker="삭제할 후기의 제작자")
+    async def 후기삭제(self, interaction: discord.Interaction, maker: discord.Member):
+        user = interaction.user
+        user_id = str(user.id)
+        maker_id = str(maker.id)
+        key = f"{user_id}:{maker_id}"
 
-@bot.event
-async def setup_hook():
-    await setup(bot)
+        if key not in data["reviews"]:
+            await interaction.response.send_message(f"❗ {maker.mention}님에게 작성한 후기가 없습니다.", ephemeral=True)
+            return
+
+        # 후기 삭제 및 통계 감소
+        del data["reviews"][key]
+        data["total_reviews"] -= 1
+        data["user_review_counts"][user_id] = max(data["user_review_counts"].get(user_id, 1) - 1, 0)
+        data["maker_review_counts"][maker_id] = max(data["maker_review_counts"].get(maker_id, 1) - 1, 0)
+
+        save_data()
+
+        await interaction.response.send_message(f"{user.mention} 님이 {maker.mention}님께 작성한 후기를 삭제했습니다.")
+
+        # 삭제 후 통계 임베드
+        embed = discord.Embed(color=discord.Color.dark_gray())
+        footer_text = f"전체 후기 수: {data['total_reviews']} | {user.name} 작성 수: {data['user_review_counts'].get(user_id, 0)} | {maker.name} 받은 수: {data['maker_review_counts'].get(maker_id, 0)}"
+        embed.set_footer(text=footer_text)
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Review(bot))
 
-
+@bot.event
+async def setup_hook():
+    await setup(bot)
 
 @bot.event
 async def on_ready():
@@ -100,7 +133,7 @@ if not TOKEN:
     exit(1)
 
 def main():
-    keep_alive()  # 웹서버 시작
+    keep_alive()  # Flask 웹서버 실행
     bot.run(TOKEN)
 
 if __name__ == "__main__":
