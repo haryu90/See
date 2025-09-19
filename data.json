@@ -1,0 +1,9 @@
+{
+  "total_reviews": 3,
+  "user_review_counts": {
+    "123456789012345678": 2
+  },
+  "maker_review_counts": {
+    "987654321098765432": 3
+  }
+}
