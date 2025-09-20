@@ -103,7 +103,7 @@ class Review(commands.Cog):
             await interaction.response.send_message("❌ 제작자 역할을 찾을 수 없습니다.", ephemeral=True)
             return
 
-        embed = discord.Embed(title="📊 후기 통계", color=discord.Color.blue())
+        embed = discord.Embed(title=" 후기 통계", color=discord.Color.blue())
         embed.add_field(name="전체 후기 수", value=str(data['total_reviews']), inline=False)
         embed.add_field(name=f"{user.name} 작성 수", value=str(data['user_review_counts'].get(user_id, 0)), inline=False)
 
