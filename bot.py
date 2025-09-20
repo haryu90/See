@@ -198,21 +198,20 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
     name=channel_name, overwrites=overwrites, category=category)
 
 # 기존 임베드 보내는 부분
-embed = discord.Embed(
-    title="티켓이 생성되었어요!",
-    description=f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
-    color=embed_color)
-embed.set_footer(text="문의해주셔서 감사합니다!")
+            embed = discord.Embed(
+                title="티켓이 생성되었어요!",
+                description=f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
+                color=embed_color)
+            embed.set_footer(text="문의해주셔서 감사합니다!")
 
-await ticket_channel.send(embed=embed, view=CloseButton())
+            await ticket_channel.send(embed=embed, view=CloseButton())
 
-# 여기서 message가 있으면 보내기
-message_to_send = data_opt.get("message")
-if message_to_send:
-    await ticket_channel.send(message_to_send)
+            # 여기서 message가 있으면 보내기
+            message_to_send = data_opt.get("message")
+            if message_to_send:
+                await ticket_channel.send(message_to_send)
 
-await interaction.response.send_message(f"티켓이 생성되었습니다 {ticket_channel.mention}", ephemeral=True)
-
+            await interaction.response.send_message(f"티켓이 생성되었습니다 {ticket_channel.mention}", ephemeral=True)
 
     class TicketView(discord.ui.View):
         def __init__(self):
