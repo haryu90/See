@@ -67,7 +67,7 @@ class Review(commands.Cog):
         save_data()
 
         await interaction.response.send_message(
-            f"{user.mention} 님의 {maker.mention} 후기: \n {content}"
+            f"{user.mention} 님의 {maker.mention} 후기:\n{content}"
         )
 
     @app_commands.command(name="후기삭제", description="작성한 후기를 삭제합니다. /후기삭제 @제작자")
@@ -91,34 +91,29 @@ class Review(commands.Cog):
 
         await interaction.response.send_message(f"{user.mention} 님이 {maker.mention}님께 작성한 후기를 삭제했습니다.")
 
-@app_commands.command(name="후기갯수", description="후기 통계를 확인합니다. 제작자 역할이 있는 사람들의 받은 후기를 모두 보여줍니다.")
-async def 후기갯수(self, interaction: discord.Interaction):
-    user = interaction.user
-    user_id = str(user.id)
+    @app_commands.command(name="후기갯수", description="후기 통계를 확인합니다. 제작자 역할이 있는 사람들의 받은 후기를 모두 보여줍니다.")
+    async def 후기갯수(self, interaction: discord.Interaction):
+        user = interaction.user
+        user_id = str(user.id)
 
-    # 제작자 역할 ID를 여기에 지정 (예: 제작자 역할 ID)
-    maker_role_id = 1413435981474041876  # 여기에 실제 제작자 역할 ID 입력
-    maker_role = interaction.guild.get_role(maker_role_id)
+        maker_role_id = 1413435981474041876  # 실제 제작자 역할 ID 입력
+        maker_role = interaction.guild.get_role(maker_role_id)
 
-    if not maker_role:
-        await interaction.response.send_message("❌ 제작자 역할을 찾을 수 없습니다.", ephemeral=True)
-        return
+        if not maker_role:
+            await interaction.response.send_message("❌ 제작자 역할을 찾을 수 없습니다.", ephemeral=True)
+            return
 
-    embed = discord.Embed(title="📊 후기 통계", color=discord.Color.blue())
+        embed = discord.Embed(title="📊 후기 통계", color=discord.Color.blue())
+        embed.add_field(name="전체 후기 수", value=str(data['total_reviews']), inline=False)
+        embed.add_field(name=f"{user.name} 작성 수", value=str(data['user_review_counts'].get(user_id, 0)), inline=False)
 
-    # 전체 후기 수와 작성자 본인의 작성 수
-    embed.add_field(name="전체 후기 수", value=str(data['total_reviews']), inline=False)
-    embed.add_field(name=f"{user.name} 작성 수", value=str(data['user_review_counts'].get(user_id, 0)), inline=False)
-
-    # 제작자 역할을 가진 유저들의 받은 수 보여주기
-    for member in maker_role.members:
-        maker_id = str(member.id)
-        received_count = data['maker_review_counts'].get(maker_id, 0)
-        embed.add_field(name=f"{member.display_name} 받은 수", value=str(received_count), inline=True)
-
-    await interaction.response.send_message(embed=embed)
+        for member in maker_role.members:
+            maker_id = str(member.id)
+            received_count = data['maker_review_counts'].get(maker_id, 0)
+            embed.add_field(name=f"{member.display_name} 받은 수", value=str(received_count), inline=True)
 
         await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(Review(bot))
