@@ -387,33 +387,7 @@ async def 말차 (ctx):
         }
     }
     await create_ticket_panel(ctx,
-                              "<a:a_B:1413444207581859860> 말차라떼 티켓함",
-                              options,
-                              category,
-                              embed_color=0xFFDAC1)
-
-
-@bot.command()
-async def 바름 (ctx):
-    category = ctx.channel.category
-    if not category:
-        await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
-        return
-
-    options = {
-        "바름 문의사항": {
-            "emoji": "<a:a_G:1413444196509024326>",
-            "roles": [],
-            "users": [1284399538563584010]
-        },
-        "바름 구매하기": {
-            "emoji": "<a:a_G:1413444196509024326>",
-            "roles": [],
-            "users": [1284399538563584010]
-        }
-    }
-    await create_ticket_panel(ctx,
-                              "<a:a_G:1413444196509024326> 몽글몽글 티켓함",
+                              "<a:a_B:1413444207581859860> 말차라떼름 티켓함",
                               options,
                               category,
                               embed_color=0xB5EAEA)
