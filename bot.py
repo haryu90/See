@@ -319,25 +319,25 @@ class TicketPanel(commands.Cog):
         await create_ticket_panel(ctx, "<a:a_B:1413444207581859860> 말차라떼 티켓함", options, category, embed_color=0xB5EAEA)
         
     @commands.command()
-    async def 말차(self, ctx):
+    async def 바름 (self, ctx):
         category = ctx.channel.category
         if not category:
             await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
             return
 
         options = {
-            "말차 문의사항": {
-                "emoji": "<a:a_B:1413444207581859860>",
+            "바름 문의사항": {
+                "emoji": "<a:a_G:1413444196509024326>",
                 "roles": [],
                 "users": [1315709432440815680]
             },
-            "말차 구매하기": {
-                "emoji": "<a:a_B:1413444207581859860>",
+            "바름 구매하기": {
+                "emoji": "<a:a_G:1413444196509024326>",
                 "roles": [],
                 "users": [1315709432440815680]
             }
         }
-        await create_ticket_panel(ctx, "<a:a_B:1413444207581859860> 말차라떼 티켓함", options, category, embed_color=0xB5EAEA)
+        await create_ticket_panel(ctx, "<a:a_G:1413444196509024326> 바름 티켓함", options, category, embed_color=0xAFFFC6)
 
 # --- 역할 부여 명령어 ---
 @bot.command()
