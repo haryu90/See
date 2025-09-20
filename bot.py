@@ -170,7 +170,6 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
             user_name = interaction.user.name.replace(" ", "-").lower()
             topic = label
 
-            # 이모지 및 공백 제거 (필요시)
             for emoji in ["🚨", " ", "🧡", "🩷", "💙", "🩵"]:
                 topic = topic.replace(emoji, "")
             topic = topic.strip()
@@ -178,10 +177,8 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
             channel_name = f"{user_name}의-{topic}".replace(" ", "-").lower()
 
             overwrites = {
-                interaction.guild.default_role:
-                discord.PermissionOverwrite(view_channel=False),
-                interaction.user:
-                discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
+                interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
             }
 
             for role_id in data_opt.get("roles", []):
@@ -195,9 +192,9 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
                     overwrites[member] = discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
 
             ticket_channel = await interaction.guild.create_text_channel(
-    name=channel_name, overwrites=overwrites, category=category)
+                name=channel_name, overwrites=overwrites, category=category)
 
-# 기존 임베드 보내는 부분
+            # 여기부터 임베드 메시지 보내는 부분
             embed = discord.Embed(
                 title="티켓이 생성되었어요!",
                 description=f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
@@ -206,7 +203,6 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
 
             await ticket_channel.send(embed=embed, view=CloseButton())
 
-            # 여기서 message가 있으면 보내기
             message_to_send = data_opt.get("message")
             if message_to_send:
                 await ticket_channel.send(message_to_send)
@@ -225,6 +221,7 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
     embed.set_footer(text="바다 전용 티켓함")
 
     await ctx.send(embed=embed, view=TicketView())
+
 
 # --- 티켓 관련 명령어 Cog (텍스트 명령어) ---
 class TicketPanel(commands.Cog):
