@@ -47,6 +47,7 @@ def save_data():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+
 # --- 후기 Cog ---
 class Review(commands.Cog):
     def __init__(self, bot):
@@ -131,6 +132,20 @@ class Review(commands.Cog):
         save_data()
 
         await interaction.response.send_message("✅ 모든 후기가 초기화되었습니다.")
+        
+# Cog 등록
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+    try:
+        await bot.tree.sync()
+        print("Slash commands synced!")
+    except Exception as e:
+        print(f"Sync error: {e}")
+
+# Review Cog 등록
+bot.add_cog(Review(bot))
+
 
 # --- CloseButton 뷰 ---
 class CloseButton(discord.ui.View):
