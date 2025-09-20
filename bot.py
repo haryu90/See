@@ -268,11 +268,14 @@ class TicketPanel(commands.Cog):
                 "emoji": "<a:a_O:1413444184672571543>",
                 "roles": [],
                 "users": [1409169549819121839]
+                "message": "<@1409169549819121839>"
             },
             "하류 구매하기": {
                 "emoji": "<a:a_O:1413444184672571543>",
                 "roles": [],
                 "users": [1409169549819121839]
+                "message": "<@1409169549819121839> 3333336964976 카카오뱅크"
+                
             }
         }
         await create_ticket_panel(ctx, "<a:a_O:1413444184672571543> 하류 티켓함", options, category, embed_color=0xC6E2FF)
@@ -289,11 +292,13 @@ class TicketPanel(commands.Cog):
                 "emoji": "<a:a_S:1413444202456551454>",
                 "roles": [],
                 "users": [1016659263055216661]
+                "message": " <@1016659263055216661> "
             },
             "유메 구매하기": {
                 "emoji": "<a:a_S:1413444202456551454>",
                 "roles": [],
                 "users": [1016659263055216661]
+                "message": "<@1016659263055216661> \n# [ 필독사항 ]\n1 . `전달하기로 무엇을 구매할 건지 가져오기`\n2 . `제작물에 맞는 양식 가져오기`\n3 . `토스뱅크 1002-0676-6144 에 가격 보고 돈 입금하기`\n`ㄴ 이름 유출 금지`\n4 . ` 맛깔나게 제작물 받기`"
             }
         }
         await create_ticket_panel(ctx, "<a:a_S:1413444202456551454> 유메 티켓함", options, category, embed_color=0xE0BBE4)
@@ -310,11 +315,14 @@ class TicketPanel(commands.Cog):
                 "emoji": "<a:a_B:1413444207581859860>",
                 "roles": [],
                 "users": [1315709432440815680]
+                "message": "<@1315709432440815680> "
             },
             "말차 구매하기": {
                 "emoji": "<a:a_B:1413444207581859860>",
                 "roles": [],
                 "users": [1315709432440815680]
+                "message": "<@1315709432440815680> 토스뱅크 1001-6666-1411"
+
             }
         }
         await create_ticket_panel(ctx, "<a:a_B:1413444207581859860> 말차라떼 티켓함", options, category, embed_color=0xB5EAEA)
@@ -331,11 +339,13 @@ class TicketPanel(commands.Cog):
                 "emoji": "<a:a_G:1413444196509024326>",
                 "roles": [],
                 "users": [1315709432440815680]
+                "message": "<@1284399538563584010> "
             },
             "바름 구매하기": {
                 "emoji": "<a:a_G:1413444196509024326>",
                 "roles": [],
                 "users": [1315709432440815680]
+                "message": "<@1284399538563584010> 토스뱅크 1001-2596-6891 ㄱㅎㄹ "
             }
         }
         await create_ticket_panel(ctx, "<a:a_G:1413444196509024326> 바름 티켓함", options, category, embed_color=0xAFFFC6)
