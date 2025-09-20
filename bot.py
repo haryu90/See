@@ -398,6 +398,26 @@ async def on_ready():
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
+@bot.command()
+async def 이름(ctx, member: discord.Member, *, new_name: str):
+    # 허용 역할 ID 리스트 (원하는 역할 ID로 바꾸세요)
+    allowed_role_ids = [1418933302932410469]
+
+    # 사용자가 허용된 역할을 갖고 있는지 확인
+    author_roles = [role.id for role in ctx.author.roles]
+    if not any(rid in allowed_role_ids for rid in author_roles):
+        await ctx.send("❌ 이 명령어를 사용할 권한이 없습니다.")
+        return
+
+    changed_name = f"꒷꒦💧  : {new_name} ₊ᐟ"
+    try:
+        await member.edit(nick=changed_name)
+    except discord.Forbidden:
+        await ctx.send("❌ 권한이 부족하여 닉네임을 변경할 수 없습니다.")
+    except Exception as e:
+        await ctx.send(f"오류가 발생했습니다: {e}")
+
+
 
 TOKEN = os.getenv("Token_")
 if not TOKEN:
