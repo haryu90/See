@@ -28,8 +28,8 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-DATA_FILE = "data.json"
 
+DATA_FILE = "data.json"
 data = {
     "total_reviews": 0,
     "user_review_counts": {},
@@ -47,6 +47,7 @@ def save_data():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+# --- 후기 Cog ---
 class Review(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -131,27 +132,7 @@ class Review(commands.Cog):
 
         await interaction.response.send_message("✅ 모든 후기가 초기화되었습니다.")
 
-
-
-
-async def setup(bot):
-    await bot.add_cog(Review(bot))
-
-@bot.event
-async def setup_hook():
-    await setup(bot)
-
-@bot.event
-async def on_ready():
-    load_data()
-    print(f"✅ 로그인됨: {bot.user} (ID: {bot.user.id})")
-    try:
-        synced = await bot.tree.sync()
-        print(f"🔁 슬래시 명령어 동기화 완료: {len(synced)}개")
-    except Exception as e:
-        print(f"❌ 슬래시 명령어 동기화 실패: {e}")
-
-
+# --- CloseButton 뷰 ---
 class CloseButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -162,49 +143,9 @@ class CloseButton(discord.ui.View):
         await asyncio.sleep(2)
         await interaction.channel.delete()
 
-async def setup(bot):
-    await bot.add_cog(Review(bot))
-
-@bot.event
-async def setup_hook():
-    await setup(bot)
-
-@bot.event
-async def on_ready():
-    load_data()
-    print(f"✅ 로그인됨: {bot.user} (ID: {bot.user.id})")
-    try:
-        synced = await bot.tree.sync()
-        print(f"🔁 슬래시 명령어 동기화 완료: {len(synced)}개")
-    except Exception as e:
-        print(f"❌ 슬래시 명령어 동기화 실패: {e}")
-
-
-class CloseButton(discord.ui.View):
-
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="티켓 닫기",
-                       style=discord.ButtonStyle.gray,  # ButtonStyle.black은 없음
-                       emoji="<a:a9:1413823289771561040>")
-    async def close_ticket(self, interaction: discord.Interaction,
-                           button: discord.ui.Button):
-        await interaction.response.send_message("티켓을 닫는 중입니다...", ephemeral=True)
-        await asyncio.sleep(2)
-        await interaction.channel.delete()
-
-
-# 티켓 패널 생성 함수
-async def create_ticket_panel(ctx,
-                              panel_title,
-                              options: dict,
-                              category,
-                              embed_color=0xFFD1DC,
-                              author_icon=""):
-
+# --- 티켓 생성 함수 ---
+async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_color=0xFFD1DC, author_icon=""):
     class TicketDropdown(discord.ui.Select):
-
         def __init__(self):
             select_options = [
                 discord.SelectOption(label=label,
@@ -219,12 +160,10 @@ async def create_ticket_panel(ctx,
 
         async def callback(self, interaction: discord.Interaction):
             label = self.values[0]
-            data = options[label]
+            data_opt = options[label]
 
-            if not category or not isinstance(category,
-                                              discord.CategoryChannel):
-                await interaction.response.send_message("❌ 카테고리를 찾을 수 없습니다.",
-                                                        ephemeral=True)
+            if not category or not isinstance(category, discord.CategoryChannel):
+                await interaction.response.send_message("❌ 카테고리를 찾을 수 없습니다.", ephemeral=True)
                 return
 
             user_name = interaction.user.name.replace(" ", "-").lower()
@@ -241,43 +180,32 @@ async def create_ticket_panel(ctx,
                 interaction.guild.default_role:
                 discord.PermissionOverwrite(view_channel=False),
                 interaction.user:
-                discord.PermissionOverwrite(view_channel=True,
-                                            send_messages=True,
-                                            read_message_history=True)
+                discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
             }
 
-            for role_id in data.get("roles", []):
+            for role_id in data_opt.get("roles", []):
                 role = interaction.guild.get_role(role_id)
                 if role:
-                    overwrites[role] = discord.PermissionOverwrite(
-                        view_channel=True,
-                        send_messages=True,
-                        read_message_history=True)
+                    overwrites[role] = discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
 
-            for user_id in data.get("users", []):
+            for user_id in data_opt.get("users", []):
                 member = interaction.guild.get_member(user_id)
                 if member:
-                    overwrites[member] = discord.PermissionOverwrite(
-                        view_channel=True,
-                        send_messages=True,
-                        read_message_history=True)
+                    overwrites[member] = discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True)
 
             ticket_channel = await interaction.guild.create_text_channel(
                 name=channel_name, overwrites=overwrites, category=category)
 
             embed = discord.Embed(
                 title=" 티켓이 생성되었어요!",
-                description=
-                f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
+                description=f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
                 color=embed_color)
             embed.set_footer(text="문의해주셔서 감사합니다!")
 
             await ticket_channel.send(embed=embed, view=CloseButton())
-            await interaction.response.send_message(
-                f"티켓이 생성되었습니다 {ticket_channel.mention}", ephemeral=True)
+            await interaction.response.send_message(f"티켓이 생성되었습니다 {ticket_channel.mention}", ephemeral=True)
 
     class TicketView(discord.ui.View):
-
         def __init__(self):
             super().__init__(timeout=None)
             self.add_item(TicketDropdown())
@@ -290,108 +218,128 @@ async def create_ticket_panel(ctx,
 
     await ctx.send(embed=embed, view=TicketView())
 
+# --- 티켓 관련 명령어 Cog ---
+class TicketPanel(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-# 각 패널별 역할/유저 ID와 이모지 포함 예시
+    @commands.command()
+    async def 신고함(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
 
-
-@bot.command()
-async def 신고함(ctx):
-    category = ctx.channel.category
-    if not category:
-        await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
-        return
-
-    options = {
-        "신고함": {
-            "emoji": "🚨",
-            "roles": [1413530966340927640],
-            "users": []
+        options = {
+            "신고함": {
+                "emoji": "🚨",
+                "roles": [1418390973469167636],
+                "users": []
+            }
         }
-    }
-    await create_ticket_panel(ctx,
-                              "바다다 문의센터",
-                              options,
-                              category,
-                              embed_color=0xFFD1DC)
+        await create_ticket_panel(ctx, "바다 문의센터", options, category, embed_color=0xFFD1DC)
 
+        @commands.command()
+    async def 문의함(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
 
-@bot.command()
-async def 하류(ctx):
-    category = ctx.channel.category
-    if not category:
-        await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
-        return
-
-    options = {
-        "하류 문의사항": {
-            "emoji": "<a:a_O:1413444184672571543>",
-            "roles": [],
-            "users": [1409169549819121839]
-        },
-        "하류 구매하기": {
-            "emoji": "<a:a_O:1413444184672571543>",
-            "roles": [],
-            "users": [1409169549819121839]
+        options = {
+            "문의함": {
+                "emoji": "✉️",
+                "roles": [1418390973469167636],
+                "users": []
+            }
         }
-    }
-    await create_ticket_panel(ctx,
-                              "<a:a_O:1413444184672571543> 하류 티켓함",
-                              options,
-                              category,
-                              embed_color=0xC6E2FF)
+        await create_ticket_panel(ctx, "바다 문의센터", options, category, embed_color=0xFFD1DC)
 
+    @commands.command()
+    async def 하류(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
 
-@bot.command()
-async def 유메(ctx):
-    category = ctx.channel.category
-    if not category:
-        await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
-        return
-
-    options = {
-        "유메 문의사항": {
-            "emoji": "<a:a_S:1413444202456551454>",
-            "roles": [],
-            "users": [1016659263055216661]
-        },
-        "유메 구매하기": {
-            "emoji": "<a:a_S:1413444202456551454>",
-            "roles": [],
-            "users": [1016659263055216661]
+        options = {
+            "하류 문의사항": {
+                "emoji": "<a:a_O:1413444184672571543>",
+                "roles": [],
+                "users": [1409169549819121839]
+            },
+            "하류 구매하기": {
+                "emoji": "<a:a_O:1413444184672571543>",
+                "roles": [],
+                "users": [1409169549819121839]
+            }
         }
-    }
-    await create_ticket_panel(ctx,
-                              "<a:a_S:1413444202456551454> 유메 티켓함",
-                              options,
-                              category,
-                              embed_color=0xE0BBE4)
+        await create_ticket_panel(ctx, "<a:a_O:1413444184672571543> 하류 티켓함", options, category, embed_color=0xC6E2FF)
 
+    @commands.command()
+    async def 유메(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
 
-@bot.command()
-async def 말차 (ctx):
-    category = ctx.channel.category
-    if not category:
-        await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
-        return
-
-    options = {
-        "말차 문의사항": {
-            "emoji": "<a:a_B:1413444207581859860>",
-            "roles": [],
-            "users": [1315709432440815680]
-        },
-        "말차 구매하기": {
-            "emoji": "<a:a_B:1413444207581859860>",
-            "roles": [],
-            "users": [1315709432440815680]
+        options = {
+            "유메 문의사항": {
+                "emoji": "<a:a_S:1413444202456551454>",
+                "roles": [],
+                "users": [1016659263055216661]
+            },
+            "유메 구매하기": {
+                "emoji": "<a:a_S:1413444202456551454>",
+                "roles": [],
+                "users": [1016659263055216661]
+            }
         }
-    }
-    await create_ticket_panel(ctx,
-                              "<a:a_B:1413444207581859860> 말차라떼름 티켓함",
-                              options,
-                              category,
-                              embed_color=0xB5EAEA)
+        await create_ticket_panel(ctx, "<a:a_S:1413444202456551454> 유메 티켓함", options, category, embed_color=0xE0BBE4)
 
+    @commands.command()
+    async def 말차(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
+
+        options = {
+            "말차 문의사항": {
+                "emoji": "<a:a_B:1413444207581859860>",
+                "roles": [],
+                "users": [1315709432440815680]
+            },
+            "말차 구매하기": {
+                "emoji": "<a:a_B:1413444207581859860>",
+                "roles": [],
+                "users": [1315709432440815680]
+            }
+        }
+        await create_ticket_panel(ctx, "<a:a_B:1413444207581859860> 말차라떼 티켓함", options, category, embed_color=0xB5EAEA)
+        
+    @commands.command()
+    async def 말차(self, ctx):
+        category = ctx.channel.category
+        if not category:
+            await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
+            return
+
+        options = {
+            "말차 문의사항": {
+                "emoji": "<a:a_B:1413444207581859860>",
+                "roles": [],
+                "users": [1315709432440815680]
+            },
+            "말차 구매하기": {
+                "emoji": "<a:a_B:1413444207581859860>",
+                "roles": [],
+                "users": [1315709432440815680]
+            }
+        }
+        await create_ticket_panel(ctx, "<a:a_B:1413444207581859860> 말차라떼 티켓함", options, category, embed_color=0xB5EAEA)
+
+# --- 역할 부여 명령어 ---
 @bot.command()
 async def 역지(ctx, member: discord.Member):
     role_id = 1418386242025820320  # 부여할 역할 ID
@@ -417,7 +365,6 @@ async def 역지(ctx, member: discord.Member):
         await ctx.send("❌ 권한이 부족해서 역할을 부여할 수 없습니다.")
     except Exception as e:
         await ctx.send(f"오류가 발생했습니다: {e}")
-
 
 TOKEN = os.getenv("Token_")
 if not TOKEN:
