@@ -113,6 +113,25 @@ class Review(commands.Cog):
             embed.add_field(name=f"{member.display_name} 받은 수", value=str(received_count), inline=True)
 
         await interaction.response.send_message(embed=embed)
+        
+    @app_commands.command(name="후기리셋", description="모든 후기를 초기화합니다. 관리자만 사용 가능.")
+    async def 후기리셋(self, interaction: discord.Interaction):
+        # 관리자 권한 체크
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ 이 명령어는 관리자만 사용할 수 있습니다.", ephemeral=True)
+            return
+
+        # 데이터 초기화
+        data["total_reviews"] = 0
+        data["user_review_counts"] = {}
+        data["maker_review_counts"] = {}
+        data["reviews"] = {}
+
+        save_data()
+
+        await interaction.response.send_message("✅ 모든 후기가 초기화되었습니다.")
+
+
 
 
 async def setup(bot):
