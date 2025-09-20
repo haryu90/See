@@ -22,13 +22,7 @@ def keep_alive():
     t = Thread(target=run_flask)
     t.start()
 
-# --- 디스코드 봇 설정 ---
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-
+# --- 데이터 파일 및 변수 ---
 DATA_FILE = "data.json"
 data = {
     "total_reviews": 0,
@@ -47,8 +41,14 @@ def save_data():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+# --- 디스코드 봇 설정 ---
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
 
-# --- 후기 Cog ---
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+# --- 후기 Cog (슬래시 커맨드) ---
 class Review(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -105,7 +105,7 @@ class Review(commands.Cog):
             await interaction.response.send_message("❌ 제작자 역할을 찾을 수 없습니다.", ephemeral=True)
             return
 
-        embed = discord.Embed(title=" 후기 통계", color=discord.Color.blue())
+        embed = discord.Embed(title="후기 통계", color=discord.Color.blue())
         embed.add_field(name="전체 후기 수", value=str(data['total_reviews']), inline=False)
         embed.add_field(name=f"{user.name} 작성 수", value=str(data['user_review_counts'].get(user_id, 0)), inline=False)
 
@@ -132,20 +132,6 @@ class Review(commands.Cog):
         save_data()
 
         await interaction.response.send_message("✅ 모든 후기가 초기화되었습니다.")
-        
-# Cog 등록
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    try:
-        await bot.tree.sync()
-        print("Slash commands synced!")
-    except Exception as e:
-        print(f"Sync error: {e}")
-
-# Review Cog 등록
-bot.add_cog(Review(bot))
-
 
 # --- CloseButton 뷰 ---
 class CloseButton(discord.ui.View):
@@ -168,7 +154,7 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
                                      emoji=options[label].get("emoji"))
                 for label in options
             ]
-            super().__init__(placeholder=" 원하는 항목을 선택해주세요!",
+            super().__init__(placeholder="원하는 항목을 선택해주세요!",
                              options=select_options,
                              min_values=1,
                              max_values=1)
@@ -212,7 +198,7 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
                 name=channel_name, overwrites=overwrites, category=category)
 
             embed = discord.Embed(
-                title=" 티켓이 생성되었어요!",
+                title="티켓이 생성되었어요!",
                 description=f"{interaction.user.mention}님, 잠시만 기다려주세요. 담당자가 곧 도와드릴게요!",
                 color=embed_color)
             embed.set_footer(text="문의해주셔서 감사합니다!")
@@ -226,14 +212,14 @@ async def create_ticket_panel(ctx, panel_title, options: dict, category, embed_c
             self.add_item(TicketDropdown())
 
     embed = discord.Embed(title=panel_title,
-                          description=" 아래 메뉴에서 원하는 항목을 선택하여 티켓을 생성해주세요!",
+                          description="아래 메뉴에서 원하는 항목을 선택하여 티켓을 생성해주세요!",
                           color=embed_color)
-    embed.set_author(name="바다 티켓봇 ")
+    embed.set_author(name="바다 티켓봇")
     embed.set_footer(text="바다 전용 티켓함")
 
     await ctx.send(embed=embed, view=TicketView())
 
-# --- 티켓 관련 명령어 Cog ---
+# --- 티켓 관련 명령어 Cog (텍스트 명령어) ---
 class TicketPanel(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
