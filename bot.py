@@ -367,6 +367,24 @@ async def 역지(ctx, member: discord.Member):
     except Exception as e:
         await ctx.send(f"오류가 발생했습니다: {e}")
 
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+
+    # Cog 등록 (한 번만 등록되도록 플래그 사용)
+    if not hasattr(bot, 'cogs_loaded'):
+        await bot.add_cog(Review(bot))
+        await bot.add_cog(TicketPanel(bot))
+        bot.cogs_loaded = True
+
+    # 슬래시 명령어 동기화
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} commands.")
+    except Exception as e:
+        print(f"Error syncing commands: {e}")
+
+
 TOKEN = os.getenv("Token_")
 if not TOKEN:
     print("ERROR: 환경변수 Token_이 설정되지 않았습니다!")
