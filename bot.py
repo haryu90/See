@@ -261,7 +261,7 @@ class TicketPanel(commands.Cog):
         await create_ticket_panel(ctx, "바다 문의센터", options, category, embed_color=0xFFD1DC)
 
     @commands.command()
-    async def 지원함 (self, ctx):
+    async def 지원함(self, ctx):
         category = ctx.channel.category
         if not category:
             await ctx.send("❌ 이 채널은 카테고리 안에 있어야 합니다!")
